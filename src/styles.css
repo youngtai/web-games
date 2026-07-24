@@ -832,6 +832,11 @@ a {
   font-size: 0.96rem;
 }
 
+.bang-bang-readout strong.is-charging {
+  color: #ffe56d;
+  animation: bang-bang-power-pulse 420ms ease-in-out infinite alternate;
+}
+
 .bang-bang-message {
   position: fixed;
   top: 82px;
@@ -891,15 +896,49 @@ a {
 }
 
 .bang-bang-controls .bang-bang-fire {
+  display: flex;
   min-width: 100px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
   background: var(--bang-gold);
   color: #3b2b00;
   font-size: 1.02rem;
+  touch-action: none;
   text-transform: uppercase;
+  user-select: none;
 }
 
 .bang-bang-controls .bang-bang-fire:hover {
   background: #ffca30;
+}
+
+.bang-bang-controls .bang-bang-fire.is-charging,
+.bang-bang-controls .bang-bang-fire.is-charging:hover {
+  background: linear-gradient(
+    90deg,
+    #ff7a38 0 var(--charge-level),
+    #ffe079 var(--charge-level) 100%
+  );
+  transform: translateY(-1px) scale(1.03);
+}
+
+.bang-bang-fire small {
+  color: inherit;
+  font-size: 0.61rem;
+  line-height: 1;
+  opacity: 0.72;
+}
+
+@keyframes bang-bang-power-pulse {
+  from {
+    opacity: 0.74;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .bang-bang-overlay {
@@ -1106,6 +1145,10 @@ a {
   .bang-bang-overlay button,
   .bang-bang-score > div {
     transition: none;
+  }
+
+  .bang-bang-readout strong.is-charging {
+    animation: none;
   }
 }
 

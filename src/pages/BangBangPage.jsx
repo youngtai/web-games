@@ -39,7 +39,13 @@ function makeGame(mode = 'cpu', scores = [0, 0], round = 1) {
     terrain,
     turn: round % 2 === 0 ? 1 : 0,
     angle: [48, 48],
-    power: [66, 66],
+    power: [28, 28],
+    cannonX: [76, WORLD_WIDTH - 76],
+    charging: false,
+    chargeDirection: 1,
+    destroyedPlayer: null,
+    pendingMode: null,
+    resultMessage: '',
     wind: Math.round((Math.random() * 2 - 1) * 18),
     projectile: null,
     particles: [],
@@ -59,7 +65,7 @@ function makeGame(mode = 'cpu', scores = [0, 0], round = 1) {
 }
 
 function cannonPosition(game, player) {
-  const x = player === 0 ? 76 : WORLD_WIDTH - 76;
+  const x = game.cannonX[player];
   return { x, y: terrainAt(game.terrain, x) - 13 };
 }
 
@@ -138,8 +144,99 @@ function drawCloud(ctx, cloud) {
   ctx.restore();
 }
 
-function drawCannon(ctx, game, player) {
+function drawBurnedFlag(ctx, position, player, now, reducedMotion) {
+  const flicker = reducedMotion ? 0 : Math.sin(now * 0.018 + player * 2.1) * 3;
+  const direction = player === 0 ? 1 : -1;
+
+  ctx.save();
+  ctx.translate(position.x, position.y + 16);
+  ctx.fillStyle = 'rgba(7, 19, 24, 0.28)';
+  ctx.beginPath();
+  ctx.ellipse(0, 5, 31, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#2b2726';
+  ctx.lineWidth = 6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, 1);
+  ctx.lineTo(0, -68);
+  ctx.stroke();
+
+  ctx.fillStyle = '#332b2a';
+  ctx.beginPath();
+  ctx.moveTo(direction * 2, -64);
+  ctx.lineTo(direction * 46, -55 + flicker * 0.35);
+  ctx.lineTo(direction * 31, -39 - flicker * 0.2);
+  ctx.lineTo(direction * 19, -46);
+  ctx.lineTo(direction * 2, -39);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#130f0e';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  const flames = [
+    { x: direction * 10, y: -40, size: 17, phase: 0 },
+    { x: direction * 29, y: -47, size: 14, phase: 1.8 },
+    { x: direction * 4, y: -5, size: 20, phase: 3.4 },
+  ];
+  for (const flame of flames) {
+    const sway = reducedMotion ? 0 : Math.sin(now * 0.024 + flame.phase) * 4;
+    ctx.fillStyle = 'rgba(255,92,31,0.88)';
+    ctx.beginPath();
+    ctx.moveTo(flame.x - flame.size * 0.48, flame.y);
+    ctx.quadraticCurveTo(
+      flame.x - flame.size * 0.16 + sway,
+      flame.y - flame.size * 1.25,
+      flame.x + sway,
+      flame.y - flame.size * 1.62
+    );
+    ctx.quadraticCurveTo(
+      flame.x + flame.size * 0.54,
+      flame.y - flame.size * 0.64,
+      flame.x + flame.size * 0.44,
+      flame.y
+    );
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#ffd95b';
+    ctx.beginPath();
+    ctx.moveTo(flame.x - flame.size * 0.2, flame.y);
+    ctx.quadraticCurveTo(
+      flame.x + sway * 0.35,
+      flame.y - flame.size * 0.86,
+      flame.x + flame.size * 0.22,
+      flame.y
+    );
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  if (!reducedMotion) {
+    for (let index = 0; index < 3; index += 1) {
+      const drift = (now * (0.012 + index * 0.002) + index * 17) % 44;
+      ctx.fillStyle = `rgba(47,54,54,${0.24 - index * 0.045})`;
+      ctx.beginPath();
+      ctx.arc(
+        direction * (9 + index * 5) + Math.sin(now * 0.01 + index) * 6,
+        -60 - drift,
+        6 + index * 2,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+function drawCannon(ctx, game, player, now, reducedMotion) {
   const position = cannonPosition(game, player);
+  if (game.destroyedPlayer === player) {
+    drawBurnedFlag(ctx, position, player, now, reducedMotion);
+    return;
+  }
   const direction = player === 0 ? 1 : -1;
   const radians = (game.angle[player] * Math.PI) / 180;
   const color = player === 0 ? '#ffdc5e' : '#ff6b72';
@@ -268,8 +365,8 @@ function drawScene(ctx, game, now, reducedMotion) {
   }
   ctx.globalAlpha = 1;
 
-  drawCannon(ctx, game, 0);
-  drawCannon(ctx, game, 1);
+  drawCannon(ctx, game, 0, now, reducedMotion);
+  drawCannon(ctx, game, 1, now, reducedMotion);
 
   if (game.projectile) {
     const projectile = game.projectile;
@@ -340,7 +437,8 @@ export function BangBangPage() {
     scores: [0, 0],
     turn: 0,
     angle: 48,
-    power: 66,
+    power: 28,
+    charging: false,
     wind: 0,
     message: 'Choose a duel',
   });
@@ -356,7 +454,8 @@ export function BangBangPage() {
       scores: [0, 0],
       turn: gameRef.current.turn,
       angle: 48,
-      power: 66,
+      power: 28,
+      charging: false,
       wind: gameRef.current.wind,
       message: 'Take the first shot',
     });
@@ -404,6 +503,7 @@ export function BangBangPage() {
         turn: game.turn,
         angle: Math.round(game.angle[game.turn]),
         power: Math.round(game.power[game.turn]),
+        charging: game.charging,
         wind: game.wind,
         message: game.message,
       });
@@ -434,24 +534,28 @@ export function BangBangPage() {
 
     const finishShot = (game, x, y, hitPlayer = -1) => {
       game.projectile = null;
+      game.charging = false;
       audioRef.current?.impact();
       spawnImpact(game, x, y, hitPlayer >= 0);
 
       if (hitPlayer >= 0) {
         const scorer = hitPlayer === 0 ? 1 : 0;
         game.scores[scorer] += 1;
+        game.destroyedPlayer = hitPlayer;
         audioRef.current?.score();
         if (game.scores[scorer] >= WIN_SCORE) {
-          game.mode = 'match-over';
-          game.message = `${scorer === 0 ? 'Gold' : 'Red'} wins the match!`;
-          audioRef.current?.win();
+          game.pendingMode = 'match-over';
+          game.resultMessage = `${scorer === 0 ? 'Gold' : 'Red'} wins the match!`;
         } else {
-          game.mode = 'round-over';
-          game.message = `${scorer === 0 ? 'Gold' : 'Red'} scores a direct hit!`;
+          game.pendingMode = 'round-over';
+          game.resultMessage = `${scorer === 0 ? 'Gold' : 'Red'} scores a direct hit!`;
         }
-        game.resolveAt = performance.now() + 1050;
+        game.mode = 'hit';
+        game.message = 'Direct hit!';
+        game.resolveAt = performance.now() + 1550;
       } else {
         game.turn = game.turn === 0 ? 1 : 0;
+        game.power[game.turn] = 28;
         game.message =
           game.playMode === 'cpu' && game.turn === 1 ? 'CPU is calculating…' : 'Adjust your shot';
         if (game.playMode === 'cpu' && game.turn === 1) {
@@ -479,24 +583,58 @@ export function BangBangPage() {
         trail: [],
       };
       game.message = 'Shell away!';
+      game.charging = false;
       game.cpuAt = 0;
       audioRef.current?.fire();
       pushUi(game, performance.now(), true);
     };
 
-    const adjust = (kind, amount) => {
+    const canPlayerControl = (game) =>
+      game.mode === 'playing' && !game.projectile && !(game.playMode === 'cpu' && game.turn === 1);
+
+    const adjustAngle = (amount) => {
       const game = gameRef.current;
-      if (
-        game.mode !== 'playing' ||
-        game.projectile ||
-        (game.playMode === 'cpu' && game.turn === 1)
-      )
-        return;
-      if (kind === 'angle') game.angle[game.turn] = clamp(game.angle[game.turn] + amount, 12, 82);
-      if (kind === 'power') game.power[game.turn] = clamp(game.power[game.turn] + amount, 28, 100);
-      game.message = kind === 'angle' ? 'Angle adjusted' : 'Power adjusted';
+      if (!canPlayerControl(game) || game.charging) return;
+      game.angle[game.turn] = clamp(game.angle[game.turn] + amount, 12, 82);
+      game.message = 'Angle adjusted';
       audioRef.current?.aim();
       pushUi(game, performance.now(), true);
+    };
+
+    const moveCannon = (amount) => {
+      const game = gameRef.current;
+      if (!canPlayerControl(game) || game.charging) return;
+      const player = game.turn;
+      const minX = player === 0 ? 42 : 585;
+      const maxX = player === 0 ? 415 : WORLD_WIDTH - 42;
+      const currentX = game.cannonX[player];
+      const nextX = clamp(currentX + amount, minX, maxX);
+      const currentY = terrainAt(game.terrain, currentX);
+      const nextY = terrainAt(game.terrain, nextX);
+      if (Math.abs(nextY - currentY) > 17) {
+        game.message = 'Too steep to move there';
+      } else {
+        game.cannonX[player] = nextX;
+        game.message = 'Cannon moved';
+      }
+      pushUi(game, performance.now(), true);
+    };
+
+    const startCharge = () => {
+      const game = gameRef.current;
+      if (!canPlayerControl(game) || game.charging) return;
+      game.power[game.turn] = 28;
+      game.chargeDirection = 1;
+      game.charging = true;
+      game.message = 'Release to fire!';
+      pushUi(game, performance.now(), true);
+    };
+
+    const releaseCharge = () => {
+      const game = gameRef.current;
+      if (!game.charging || !canPlayerControl(game)) return;
+      game.charging = false;
+      fire();
     };
 
     const newRound = () => {
@@ -513,7 +651,7 @@ export function BangBangPage() {
       pushUi(gameRef.current, performance.now(), true);
     };
 
-    commandRef.current = { fire, adjust, newRound, restart };
+    commandRef.current = { adjustAngle, moveCannon, newRound, releaseCharge, restart, startCharge };
 
     const cpuShoot = (game) => {
       const target = cannonPosition(game, 0);
@@ -550,14 +688,20 @@ export function BangBangPage() {
       if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].includes(event.code)) {
         event.preventDefault();
       }
-      if (event.repeat && event.code === 'Space') return;
-      if (event.code === 'ArrowLeft' || event.code === 'KeyA') adjust('angle', -2);
-      if (event.code === 'ArrowRight' || event.code === 'KeyD') adjust('angle', 2);
-      if (event.code === 'ArrowUp' || event.code === 'KeyW') adjust('power', 2);
-      if (event.code === 'ArrowDown' || event.code === 'KeyS') adjust('power', -2);
-      if (event.code === 'Space' || event.code === 'Enter') fire();
+      if (event.code === 'ArrowLeft' || event.code === 'KeyA') moveCannon(-7);
+      if (event.code === 'ArrowRight' || event.code === 'KeyD') moveCannon(7);
+      if (event.code === 'ArrowUp' || event.code === 'KeyW') adjustAngle(2);
+      if (event.code === 'ArrowDown' || event.code === 'KeyS') adjustAngle(-2);
+      if (event.code === 'Space' && !event.repeat) startCharge();
       if (event.code === 'KeyR') restart();
       if (event.code === 'KeyN' && gameRef.current.mode === 'round-over') newRound();
+    };
+
+    const onKeyUp = (event) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        releaseCharge();
+      }
     };
 
     let lastGamepad = 0;
@@ -566,15 +710,16 @@ export function BangBangPage() {
       const gamepad = Array.from(navigator.getGamepads?.() || []).find(Boolean);
       if (!gamepad) return;
       const firePressed = gamepad.buttons[0]?.pressed || gamepad.buttons[7]?.pressed;
-      if (firePressed && !gamepadFireHeld) fire();
+      if (firePressed && !gamepadFireHeld) startCharge();
+      if (!firePressed && gamepadFireHeld) releaseCharge();
       gamepadFireHeld = firePressed;
       if (now - lastGamepad < 130) return;
       const horizontal = gamepad.axes[0] || 0;
       const vertical = gamepad.axes[1] || 0;
-      if (horizontal < -0.5 || gamepad.buttons[14]?.pressed) adjust('angle', -2);
-      else if (horizontal > 0.5 || gamepad.buttons[15]?.pressed) adjust('angle', 2);
-      else if (vertical < -0.5 || gamepad.buttons[12]?.pressed) adjust('power', 2);
-      else if (vertical > 0.5 || gamepad.buttons[13]?.pressed) adjust('power', -2);
+      if (horizontal < -0.5 || gamepad.buttons[14]?.pressed) moveCannon(-7);
+      else if (horizontal > 0.5 || gamepad.buttons[15]?.pressed) moveCannon(7);
+      else if (vertical < -0.5 || gamepad.buttons[12]?.pressed) adjustAngle(2);
+      else if (vertical > 0.5 || gamepad.buttons[13]?.pressed) adjustAngle(-2);
       else return;
       lastGamepad = now;
     };
@@ -596,12 +741,25 @@ export function BangBangPage() {
       game.shake = Math.max(0, game.shake - dt * 42);
       game.flash = Math.max(0, game.flash - dt * 3.4);
 
-      if (game.mode === 'round-over' && now >= game.resolveAt) {
-        game.message = 'Round complete';
+      if (game.mode === 'hit' && now >= game.resolveAt) {
+        game.mode = game.pendingMode;
+        game.message = game.resultMessage;
+        if (game.mode === 'match-over') audioRef.current?.win();
         pushUi(game, now, true);
       }
 
       if (game.mode !== 'playing') return;
+      if (game.charging) {
+        game.power[game.turn] += game.chargeDirection * 58 * dt;
+        if (game.power[game.turn] >= 100) {
+          game.power[game.turn] = 100;
+          game.chargeDirection = -1;
+        } else if (game.power[game.turn] <= 28) {
+          game.power[game.turn] = 28;
+          game.chargeDirection = 1;
+        }
+        pushUi(game, now);
+      }
       if (game.cpuAt && now >= game.cpuAt) cpuShoot(game);
 
       const projectile = game.projectile;
@@ -660,12 +818,14 @@ export function BangBangPage() {
     resize();
     window.addEventListener('resize', resize);
     window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('keyup', onKeyUp);
     frameRef.current = requestAnimationFrame(render);
 
     return () => {
       cancelAnimationFrame(frameRef.current);
       window.removeEventListener('resize', resize);
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('keyup', onKeyUp);
     };
   }, []);
 
@@ -729,7 +889,7 @@ export function BangBangPage() {
           </div>
           <div>
             <span>Power</span>
-            <strong>{snapshot.power}</strong>
+            <strong className={snapshot.charging ? 'is-charging' : ''}>{snapshot.power}</strong>
           </div>
           <div>
             <span>Wind</span>
@@ -745,26 +905,35 @@ export function BangBangPage() {
       {canControl && (
         <section className="bang-bang-controls" aria-label="Cannon controls">
           <div className="bang-bang-control-pair">
-            <button type="button" onClick={() => commandRef.current.adjust?.('angle', -2)}>
-              Angle −
+            <button type="button" onClick={() => commandRef.current.moveCannon?.(-7)}>
+              Move ←
             </button>
-            <button type="button" onClick={() => commandRef.current.adjust?.('angle', 2)}>
-              Angle +
+            <button type="button" onClick={() => commandRef.current.moveCannon?.(7)}>
+              Move →
             </button>
           </div>
           <button
             type="button"
-            className="bang-bang-fire"
-            onClick={() => commandRef.current.fire?.()}
+            className={`bang-bang-fire ${snapshot.charging ? 'is-charging' : ''}`}
+            onPointerDown={(event) => {
+              event.currentTarget.setPointerCapture(event.pointerId);
+              commandRef.current.startCharge?.();
+            }}
+            onPointerUp={() => commandRef.current.releaseCharge?.()}
+            onPointerCancel={() => commandRef.current.releaseCharge?.()}
+            onContextMenu={(event) => event.preventDefault()}
+            aria-label="Hold to charge power, then release to fire"
+            style={{ '--charge-level': `${snapshot.power}%` }}
           >
-            Fire
+            <span>{snapshot.charging ? 'Release!' : 'Hold'}</span>
+            <small>Power</small>
           </button>
           <div className="bang-bang-control-pair">
-            <button type="button" onClick={() => commandRef.current.adjust?.('power', -2)}>
-              Power −
+            <button type="button" onClick={() => commandRef.current.adjustAngle?.(2)}>
+              Aim ↑
             </button>
-            <button type="button" onClick={() => commandRef.current.adjust?.('power', 2)}>
-              Power +
+            <button type="button" onClick={() => commandRef.current.adjustAngle?.(-2)}>
+              Aim ↓
             </button>
           </div>
         </section>
@@ -788,7 +957,7 @@ export function BangBangPage() {
               <span>Pass the controls</span>
             </button>
           </div>
-          <small>Arrows or WASD to aim · Space to fire · Gamepad ready</small>
+          <small>↑↓ aim · ←→ move · Hold Space for power, release to fire · Gamepad ready</small>
         </section>
       )}
 
@@ -817,7 +986,7 @@ export function BangBangPage() {
         </section>
       )}
 
-      {snapshot.mode === 'playing' && (
+      {(snapshot.mode === 'playing' || snapshot.mode === 'hit') && (
         <p className="bang-bang-message" aria-live="polite">
           {snapshot.message}
         </p>
