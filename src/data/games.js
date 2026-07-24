@@ -1,5 +1,15 @@
 export const games = [
   {
+    id: 'bang-bang',
+    title: 'Bang! Bang!',
+    path: '/games/bang-bang',
+    players: '1-2 players',
+    pace: 'Artillery duel',
+    blurb: 'Read the wind, arc shots over the mountain, and reshape the battlefield.',
+    accent: 'orange',
+    thumbnail: 'bang-bang',
+  },
+  {
     id: 'asteroids',
     title: 'Asteroids',
     path: '/games/asteroids',

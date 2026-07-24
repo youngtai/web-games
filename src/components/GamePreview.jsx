@@ -14,6 +14,10 @@ export function GamePreview({ type }) {
       <span className="preview-immune-cell preview-immune-cell--two" />
       <span className="preview-bacterium preview-bacterium--one" />
       <span className="preview-bacterium preview-bacterium--two" />
+      <span className="preview-cannon preview-cannon--one" />
+      <span className="preview-cannon preview-cannon--two" />
+      <span className="preview-mountain" />
+      <span className="preview-shell" />
     </div>
   );
 }
