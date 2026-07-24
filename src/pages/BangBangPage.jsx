@@ -6,6 +6,7 @@ const WORLD_WIDTH = 1000;
 const WORLD_HEIGHT = 600;
 const GRAVITY = 250;
 const WIN_SCORE = 3;
+const MAX_ANGLE = 90;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const terrainAt = (terrain, x) =>
@@ -595,7 +596,7 @@ export function BangBangPage() {
     const adjustAngle = (amount) => {
       const game = gameRef.current;
       if (!canPlayerControl(game) || game.charging) return;
-      game.angle[game.turn] = clamp(game.angle[game.turn] + amount, 12, 82);
+      game.angle[game.turn] = clamp(game.angle[game.turn] + amount, 12, MAX_ANGLE);
       game.message = 'Angle adjusted';
       audioRef.current?.aim();
       pushUi(game, performance.now(), true);
@@ -679,7 +680,7 @@ export function BangBangPage() {
       }
 
       const accuracy = game.round < 3 ? 12 : 7.5;
-      game.angle[1] = clamp(best.angle + (Math.random() - 0.5) * accuracy, 12, 82);
+      game.angle[1] = clamp(best.angle + (Math.random() - 0.5) * accuracy, 12, MAX_ANGLE);
       game.power[1] = clamp(best.power + (Math.random() - 0.5) * accuracy, 28, 100);
       fire();
     };
