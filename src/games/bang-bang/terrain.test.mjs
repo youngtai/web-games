@@ -1,9 +1,17 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { carveTerrain } from './terrain.mjs';
+import { carveTerrain, generateTerrain } from './terrain.mjs';
 
 const POINTS = 501;
 const CENTER_INDEX = 250;
+
+function seededRandom(seed) {
+  let state = seed;
+  return () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
+  };
+}
 
 function assertLocalSettling(original, carved) {
   assert.ok(carved.every((height, index) => height >= original[index]));
@@ -41,4 +49,23 @@ test('settles a downhill impact and supports repeated craters', () => {
   assert.ok(second.every((height, index) => height >= first[index]));
   assert.ok(second.every(Number.isFinite));
   assertLocalSettling(terrain, second);
+});
+
+test('generates different safe battlefields for new games', () => {
+  const first = generateTerrain({ random: seededRandom(17) });
+  const second = generateTerrain({ random: seededRandom(91) });
+
+  assert.notDeepEqual(first, second);
+  assert.equal(first.length, POINTS);
+  assert.ok(first.every((height) => Number.isFinite(height) && height >= 175 && height <= 525));
+  assert.ok(second.every((height) => Number.isFinite(height) && height >= 175 && height <= 525));
+
+  for (let index = 0; index <= 65; index += 1) {
+    assert.equal(first[index], first[0]);
+    assert.equal(second[index], second[0]);
+  }
+  for (let index = 435; index < POINTS; index += 1) {
+    assert.equal(first[index], first[POINTS - 1]);
+    assert.equal(second[index], second[POINTS - 1]);
+  }
 });

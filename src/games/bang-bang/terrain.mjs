@@ -1,5 +1,42 @@
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
+const smootherStep = (value) => {
+  const bounded = clamp(value, 0, 1);
+  return bounded * bounded * bounded * (bounded * (bounded * 6 - 15) + 10);
+};
+
+export function generateTerrain({ points = 501, random = Math.random } = {}) {
+  const terrain = [];
+  const baseHeight = 512 + random() * 10;
+  const peakX = 0.38 + random() * 0.24;
+  const peakHeight = 220 + random() * 110;
+  const peakWidth = 0.07 + random() * 0.06;
+  const shoulderDirection = random() < 0.5 ? -1 : 1;
+  const shoulderX = clamp(peakX + shoulderDirection * (0.1 + random() * 0.14), 0.28, 0.72);
+  const shoulderHeight = 35 + random() * 90;
+  const shoulderWidth = 0.07 + random() * 0.09;
+  const rippleAmplitude = 5 + random() * 10;
+  const rippleFrequency = 2 + random() * 2.5;
+  const ripplePhase = random() * Math.PI * 2;
+  const detailPhase = random() * Math.PI * 2;
+
+  for (let index = 0; index < points; index += 1) {
+    const x = index / (points - 1);
+    const peak = Math.exp(-((x - peakX) ** 2) / (2 * peakWidth ** 2)) * peakHeight;
+    const shoulder = Math.exp(-((x - shoulderX) ** 2) / (2 * shoulderWidth ** 2)) * shoulderHeight;
+    const ripple =
+      Math.sin(x * Math.PI * 2 * rippleFrequency + ripplePhase) * rippleAmplitude +
+      Math.sin(x * Math.PI * 9 + detailPhase) * 3;
+    const leftBlend = smootherStep((x - 0.13) / 0.12);
+    const rightBlend = smootherStep((0.87 - x) / 0.12);
+    const playableBlend = leftBlend * rightBlend;
+
+    terrain.push(clamp(baseHeight - (peak + shoulder + ripple) * playableBlend, 175, 525));
+  }
+
+  return terrain;
+}
+
 export function carveTerrain(
   terrain,
   impactX,

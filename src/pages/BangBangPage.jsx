@@ -1,7 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { carveTerrain } from '../games/bang-bang/terrain.mjs';
+import { carveTerrain, generateTerrain } from '../games/bang-bang/terrain.mjs';
 
 const WORLD_WIDTH = 1000;
 const WORLD_HEIGHT = 600;
@@ -13,26 +13,8 @@ const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const terrainAt = (terrain, x) =>
   terrain[clamp(Math.round((x / WORLD_WIDTH) * (terrain.length - 1)), 0, terrain.length - 1)];
 
-function makeTerrain(round = 1) {
-  const points = 501;
-  const terrain = [];
-  const peakX = 0.43 + ((round * 37) % 13) / 100;
-  const peakHeight = 245 + ((round * 53) % 75);
-
-  for (let index = 0; index < points; index += 1) {
-    const x = index / (points - 1);
-    const mountain = Math.exp(-((x - peakX) ** 2) / 0.018) * peakHeight;
-    const shoulder = Math.exp(-((x - (peakX + 0.17)) ** 2) / 0.045) * 55;
-    const ripple = Math.sin(x * Math.PI * 5 + round) * 10 + Math.sin(x * Math.PI * 11) * 4;
-    const protectedEdge = x < 0.14 || x > 0.86 ? 0 : ripple;
-    terrain.push(clamp(520 - mountain - shoulder - protectedEdge, 175, 525));
-  }
-
-  return terrain;
-}
-
 function makeGame(mode = 'cpu', scores = [0, 0], round = 1) {
-  const terrain = makeTerrain(round);
+  const terrain = generateTerrain();
   return {
     mode: 'playing',
     playMode: mode,
