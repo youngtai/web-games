@@ -68,4 +68,7 @@ test('generates different safe battlefields for new games', () => {
     assert.equal(first[index], first[POINTS - 1]);
     assert.equal(second[index], second[POINTS - 1]);
   }
+
+  assert.ok(Math.abs(first[0] - first[POINTS - 1]) >= 35);
+  assert.ok(Math.abs(second[0] - second[POINTS - 1]) >= 35);
 });

@@ -7,7 +7,11 @@ const smootherStep = (value) => {
 
 export function generateTerrain({ points = 501, random = Math.random } = {}) {
   const terrain = [];
-  const baseHeight = 512 + random() * 10;
+  const raisedPlatform = 440 + random() * 35;
+  const loweredPlatform = Math.min(525, raisedPlatform + 35 + random() * 45);
+  const leftIsRaised = random() < 0.5;
+  const leftPlatform = leftIsRaised ? raisedPlatform : loweredPlatform;
+  const rightPlatform = leftIsRaised ? loweredPlatform : raisedPlatform;
   const peakX = 0.38 + random() * 0.24;
   const peakHeight = 220 + random() * 110;
   const peakWidth = 0.07 + random() * 0.06;
@@ -30,6 +34,8 @@ export function generateTerrain({ points = 501, random = Math.random } = {}) {
     const leftBlend = smootherStep((x - 0.13) / 0.12);
     const rightBlend = smootherStep((0.87 - x) / 0.12);
     const playableBlend = leftBlend * rightBlend;
+    const platformBlend = smootherStep((x - 0.13) / 0.74);
+    const baseHeight = leftPlatform + (rightPlatform - leftPlatform) * platformBlend;
 
     terrain.push(clamp(baseHeight - (peak + shoulder + ripple) * playableBlend, 175, 525));
   }
