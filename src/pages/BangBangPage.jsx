@@ -1,6 +1,7 @@
 import { Link } from '@tanstack/react-router';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { carveTerrain } from '../games/bang-bang/terrain.mjs';
 
 const WORLD_WIDTH = 1000;
 const WORLD_HEIGHT = 600;
@@ -795,12 +796,8 @@ export function BangBangPage() {
       ) {
         const impactX = projectile.x;
         const impactY = terrainAt(game.terrain, impactX);
-        const radius = 42;
-        game.terrain = game.terrain.map((height, index) => {
-          const x = (index / (game.terrain.length - 1)) * WORLD_WIDTH;
-          const dx = Math.abs(x - impactX);
-          if (dx >= radius) return height;
-          return clamp(height + Math.sqrt(radius ** 2 - dx ** 2) * 0.7, 0, 548);
+        game.terrain = carveTerrain(game.terrain, impactX, impactY, {
+          worldWidth: WORLD_WIDTH,
         });
         finishShot(game, impactX, impactY);
       }

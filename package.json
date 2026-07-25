@@ -7,6 +7,7 @@
     "build": "vite build",
     "dev": "vite --host 0.0.0.0",
     "check": "biome check .",
+    "test:bang-bang": "node --test src/games/bang-bang/terrain.test.mjs",
     "format": "biome format --write .",
     "lint": "biome lint .",
     "preview": "vite preview --host 0.0.0.0",
