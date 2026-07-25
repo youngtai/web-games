@@ -7,11 +7,8 @@ const smootherStep = (value) => {
 
 export function generateTerrain({ points = 501, random = Math.random } = {}) {
   const terrain = [];
-  const raisedPlatform = 440 + random() * 35;
-  const loweredPlatform = Math.min(525, raisedPlatform + 35 + random() * 45);
-  const leftIsRaised = random() < 0.5;
-  const leftPlatform = leftIsRaised ? raisedPlatform : loweredPlatform;
-  const rightPlatform = leftIsRaised ? loweredPlatform : raisedPlatform;
+  const leftPlatform = 360 + random() * 165;
+  const rightPlatform = 360 + random() * 165;
   const peakX = 0.38 + random() * 0.24;
   const peakHeight = 220 + random() * 110;
   const peakWidth = 0.07 + random() * 0.06;

@@ -13,6 +13,11 @@ function seededRandom(seed) {
   };
 }
 
+function sequenceRandom(values, fallback = 0.5) {
+  let index = 0;
+  return () => values[index++] ?? fallback;
+}
+
 function assertLocalSettling(original, carved) {
   assert.ok(carved.every((height, index) => height >= original[index]));
   assert.equal(carved[180], original[180]);
@@ -69,6 +74,14 @@ test('generates different safe battlefields for new games', () => {
     assert.equal(second[index], second[POINTS - 1]);
   }
 
-  assert.ok(Math.abs(first[0] - first[POINTS - 1]) >= 35);
-  assert.ok(Math.abs(second[0] - second[POINTS - 1]) >= 35);
+  assert.ok(Math.abs(first[0] - first[POINTS - 1]) <= 165);
+  assert.ok(Math.abs(second[0] - second[POINTS - 1]) <= 165);
+});
+
+test('allows both near-level and dramatically uneven player platforms', () => {
+  const level = generateTerrain({ random: sequenceRandom([0.5, 0.5]) });
+  const uneven = generateTerrain({ random: sequenceRandom([0, 0.999]) });
+
+  assert.equal(level[0], level[POINTS - 1]);
+  assert.ok(Math.abs(uneven[0] - uneven[POINTS - 1]) > 160);
 });
