@@ -612,6 +612,753 @@ a {
   transform: rotate(-18deg) scale(0.72);
 }
 
+/* Bespoke arcade attract screens. Each preview borrows its game's actual visual language. */
+.game-preview {
+  min-height: 260px;
+  padding: 9px 9px 28px;
+  background: #070b10;
+}
+
+.game-preview::before {
+  display: none;
+}
+
+.preview-screen {
+  position: absolute;
+  inset: 9px 9px 28px;
+  overflow: hidden;
+  background: #07111a;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+
+.preview-screen::after {
+  position: absolute;
+  z-index: 20;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05),
+    transparent 18% 82%,
+    rgba(0, 0, 0, 0.18)
+  );
+  content: "";
+}
+
+.preview-bezel {
+  position: absolute;
+  right: 12px;
+  bottom: 7px;
+  left: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 14px;
+}
+
+.preview-bezel::before {
+  width: 28px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.17);
+  content: "";
+}
+
+.preview-bezel span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #34414a;
+}
+
+.preview-bezel span:first-of-type {
+  margin-left: auto;
+  background: var(--card-accent, var(--cyan));
+  box-shadow: 0 0 7px var(--card-accent, var(--cyan));
+}
+
+.preview-hud {
+  position: absolute;
+  z-index: 15;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 8px;
+  background: rgba(2, 7, 12, 0.78);
+  color: rgba(255, 255, 255, 0.82);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.preview-hud strong {
+  color: var(--card-accent, var(--cyan));
+  font-size: inherit;
+}
+
+/* Bang! Bang! */
+.game-preview--bang-bang .preview-screen {
+  background: linear-gradient(#2d9acb 0 58%, #a6d885 58%);
+}
+
+.preview-hud--sky {
+  background: rgba(16, 79, 113, 0.86);
+}
+
+.preview-hud--sky strong {
+  color: #fff3a6;
+}
+
+.bang-cloud {
+  position: absolute;
+  z-index: 2;
+  width: 34px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    11px -5px 0 2px rgba(255, 255, 255, 0.82),
+    21px 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+.bang-cloud--one {
+  top: 48px;
+  left: 13%;
+}
+
+.bang-cloud--two {
+  top: 73px;
+  right: 19%;
+  transform: scale(0.7);
+}
+
+.bang-terrain {
+  position: absolute;
+  z-index: 3;
+  inset: 37% -12% -1px;
+  background: linear-gradient(110deg, #5fbd42, #188145 72%);
+  clip-path: polygon(0 57%, 17% 57%, 35% 10%, 49% 0, 67% 79%, 83% 88%, 100% 88%, 100% 100%, 0 100%);
+  box-shadow: inset 0 5px rgba(190, 239, 103, 0.52);
+}
+
+.bang-cannon {
+  position: absolute;
+  z-index: 5;
+  bottom: 17%;
+  width: 31px;
+  height: 14px;
+  border-radius: 3px;
+  box-shadow:
+    -7px 9px 0 -3px #30251f,
+    8px 9px 0 -3px #30251f;
+}
+
+.bang-cannon::before {
+  position: absolute;
+  top: -5px;
+  width: 30px;
+  height: 6px;
+  border-radius: 3px;
+  background: #44342c;
+  content: "";
+}
+
+.bang-cannon--left {
+  left: 7%;
+  background: #ffe06b;
+}
+
+.bang-cannon--left::before {
+  left: 9px;
+  transform: rotate(-35deg);
+  transform-origin: left center;
+}
+
+.bang-cannon--right {
+  right: 7%;
+  bottom: 7%;
+  background: #ff727a;
+}
+
+.bang-cannon--right::before {
+  right: 9px;
+  transform: rotate(35deg);
+  transform-origin: right center;
+}
+
+.bang-projectile {
+  position: absolute;
+  z-index: 7;
+  top: 34%;
+  left: 53%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #182836;
+  box-shadow:
+    0 0 0 2px #fff09b,
+    0 0 13px 5px rgba(255, 134, 54, 0.72);
+}
+
+/* Asteroids */
+.game-preview--asteroids .preview-screen {
+  background:
+    radial-gradient(circle at 16% 32%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 78% 24%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 34% 76%, rgba(255, 255, 255, 0.7) 0 1px, transparent 2px),
+    linear-gradient(155deg, #071521, #020509 72%);
+}
+
+.asteroid {
+  position: absolute;
+  z-index: 3;
+  border: 2px solid #b9d5df;
+  background: #23313a;
+  clip-path: polygon(21% 0, 70% 8%, 100% 41%, 78% 88%, 31% 100%, 0 63%, 7% 24%);
+  box-shadow: inset 8px -7px rgba(0, 0, 0, 0.24);
+}
+
+.asteroid--large {
+  top: 42px;
+  right: -15px;
+  width: 75px;
+  height: 70px;
+  transform: rotate(18deg);
+}
+
+.asteroid--small {
+  bottom: 24px;
+  left: 14px;
+  width: 46px;
+  height: 42px;
+  transform: rotate(-20deg);
+}
+
+.asteroid-ship {
+  position: absolute;
+  z-index: 6;
+  top: 50%;
+  left: 38%;
+  width: 52px;
+  height: 42px;
+  border: 3px solid #69ddff;
+  background: rgba(105, 221, 255, 0.12);
+  clip-path: polygon(50% 0, 100% 100%, 50% 74%, 0 100%);
+  filter: drop-shadow(0 0 8px rgba(105, 221, 255, 0.56));
+  transform: rotate(22deg);
+}
+
+.asteroid-laser {
+  position: absolute;
+  z-index: 5;
+  top: 40%;
+  left: 58%;
+  width: 48px;
+  height: 2px;
+  background: #ff6f5f;
+  box-shadow: 0 0 7px #ff6f5f;
+  transform: rotate(-27deg);
+  transform-origin: left center;
+}
+
+.asteroid-ufo {
+  position: absolute;
+  right: 20px;
+  bottom: 24px;
+  width: 52px;
+  height: 14px;
+  border: 2px solid #ffd35b;
+  border-radius: 50%;
+  background: rgba(255, 211, 91, 0.12);
+  box-shadow: 0 -7px 0 -2px #ffd35b;
+}
+
+/* Star Catcher */
+.game-preview--star-catcher .preview-screen {
+  background:
+    radial-gradient(circle at 20% 30%, #fff 0 1px, transparent 2px),
+    radial-gradient(circle at 76% 46%, #fff 0 1px, transparent 2px),
+    linear-gradient(#06131f, #020509);
+}
+
+.game-preview--star-catcher .preview-screen::before {
+  position: absolute;
+  right: -25%;
+  bottom: -4px;
+  left: -25%;
+  height: 38%;
+  border-top: 1px solid rgba(87, 211, 255, 0.2);
+  box-shadow:
+    0 18px rgba(87, 211, 255, 0.1),
+    0 36px rgba(87, 211, 255, 0.06);
+  content: "";
+}
+
+.catcher-star {
+  position: absolute;
+  z-index: 4;
+  color: #ffd95c;
+  font-size: 1.75rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 7px rgba(255, 217, 92, 0.72));
+}
+
+.catcher-star--one {
+  top: 25%;
+  left: 18%;
+}
+.catcher-star--two {
+  top: 43%;
+  right: 17%;
+  transform: scale(0.68) rotate(18deg);
+}
+.catcher-star--three {
+  bottom: 26%;
+  left: 24%;
+  transform: scale(0.82) rotate(-12deg);
+}
+
+.catcher-comet {
+  position: absolute;
+  z-index: 3;
+  top: 35%;
+  right: 8%;
+  width: 31px;
+  height: 31px;
+  border: 2px solid #ffd7b8;
+  border-radius: 50%;
+  background: #ff7a47;
+  box-shadow:
+    -22px 3px 0 -8px rgba(255, 122, 71, 0.45),
+    -39px 6px 0 -12px rgba(255, 122, 71, 0.25);
+}
+
+.catcher-ship {
+  position: absolute;
+  z-index: 6;
+  right: 27%;
+  bottom: 12%;
+  width: 54px;
+  height: 48px;
+  border: 3px solid #75e4ff;
+  background: rgba(117, 228, 255, 0.12);
+  clip-path: polygon(50% 0, 100% 100%, 50% 78%, 0 100%);
+  filter: drop-shadow(0 0 8px rgba(117, 228, 255, 0.52));
+}
+
+/* Sticker Book */
+.game-preview--sticker-book .preview-screen {
+  background: #a9d9e7;
+}
+
+.sticker-scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 53% center;
+  filter: saturate(0.92) contrast(0.96);
+}
+
+.preview-hud--paper {
+  background: rgba(255, 255, 255, 0.88);
+  color: #17323b;
+}
+
+.preview-hud--paper strong {
+  color: #20714b;
+}
+
+.sticker-piece {
+  position: absolute;
+  z-index: 6;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 2px rgba(28, 48, 37, 0.28));
+}
+
+.sticker-piece--basket {
+  right: 5%;
+  bottom: 14%;
+  width: 74px;
+  transform: rotate(4deg);
+}
+
+.sticker-piece--apple {
+  bottom: 27%;
+  left: 7%;
+  width: 52px;
+  transform: rotate(-8deg);
+}
+
+.sticker-cursor {
+  position: absolute;
+  z-index: 8;
+  right: 23%;
+  bottom: 29%;
+  color: #fff;
+  font-size: 1.35rem;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.38);
+}
+
+/* Lizard Lunch */
+.game-preview--lizard-lunch .preview-screen {
+  background:
+    radial-gradient(circle at 16% 35%, rgba(180, 255, 210, 0.6) 0 2px, transparent 3px),
+    radial-gradient(circle at 76% 28%, rgba(180, 255, 210, 0.5) 0 1px, transparent 2px),
+    linear-gradient(#0a2018, #04100c);
+}
+
+.lizard-target {
+  position: absolute;
+  z-index: 8;
+  top: 42px;
+  right: 12px;
+  padding: 4px 8px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-radius: 7px;
+  background: rgba(8, 24, 18, 0.9);
+  color: #f7fbff;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.lizard-target::first-letter {
+  color: #a6ff7a;
+}
+
+.lizard-bug {
+  position: absolute;
+  z-index: 6;
+  top: 79px;
+  right: 29px;
+  width: 25px;
+  height: 34px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  background: #ffd35b;
+}
+
+.lizard-bug::before,
+.lizard-bug::after {
+  position: absolute;
+  top: 4px;
+  width: 15px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  content: "";
+}
+
+.lizard-bug::before {
+  right: 16px;
+  transform: rotate(-26deg);
+}
+.lizard-bug::after {
+  left: 16px;
+  transform: rotate(26deg);
+}
+
+.lizard-bug i,
+.lizard-bug i::after {
+  position: absolute;
+  top: 8px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #17251d;
+  content: "";
+}
+
+.lizard-bug i {
+  left: 4px;
+}
+.lizard-bug i::after {
+  left: 10px;
+}
+
+.lizard-tongue {
+  position: absolute;
+  z-index: 5;
+  right: 43px;
+  bottom: 69px;
+  width: 83px;
+  height: 7px;
+  border-radius: 999px;
+  background: #ff4d7d;
+  box-shadow: 0 0 7px rgba(255, 77, 125, 0.4);
+  transform: rotate(-43deg);
+  transform-origin: right center;
+}
+
+.lizard-face {
+  position: absolute;
+  z-index: 6;
+  right: 11%;
+  bottom: -19px;
+  left: 11%;
+  height: 103px;
+  border: 3px solid rgba(0, 0, 0, 0.16);
+  border-radius: 48% 48% 42% 42%;
+  background: #3cc777;
+  box-shadow: inset 0 -21px #2f9e5e;
+}
+
+.lizard-eye {
+  position: absolute;
+  top: -15px;
+  width: 29px;
+  height: 29px;
+  border: 7px solid #eafff2;
+  border-radius: 50%;
+  background: #10241a;
+}
+
+.lizard-eye--left {
+  left: 15%;
+}
+.lizard-eye--right {
+  right: 15%;
+}
+
+.lizard-keys {
+  position: absolute;
+  z-index: 9;
+  right: 8px;
+  bottom: 7px;
+  left: 8px;
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.lizard-keys span {
+  display: grid;
+  width: 23px;
+  height: 20px;
+  place-items: center;
+  border-radius: 3px;
+  background: rgba(4, 16, 12, 0.86);
+  color: #f7fbff;
+  font-size: 0.58rem;
+  font-weight: 850;
+}
+
+.lizard-keys span:first-child {
+  color: #10241a;
+  background: #a6ff7a;
+}
+
+/* Immune */
+.game-preview--immune .preview-screen {
+  background:
+    radial-gradient(circle at 62% 52%, rgba(255, 109, 140, 0.25), transparent 32%),
+    linear-gradient(150deg, #45224f, #151832 72%);
+}
+
+.immune-cell {
+  position: absolute;
+  z-index: 5;
+  border: 3px solid rgba(255, 255, 255, 0.88);
+  border-radius: 46% 54% 48% 52%;
+  box-shadow: 0 0 17px rgba(255, 255, 255, 0.22);
+}
+
+.immune-cell i {
+  position: absolute;
+  top: 31%;
+  left: 33%;
+  width: 34%;
+  height: 34%;
+  border-radius: 50%;
+  background: rgba(29, 55, 108, 0.7);
+}
+
+.immune-cell--sentinel {
+  top: 33%;
+  left: 16%;
+  width: 78px;
+  height: 72px;
+  background: #58d7ff;
+  transform: rotate(-10deg);
+}
+
+.immune-cell--helper {
+  right: 12%;
+  bottom: 13%;
+  width: 55px;
+  height: 55px;
+  background: #8df29a;
+}
+
+.immune-bacterium {
+  position: absolute;
+  z-index: 7;
+  width: 43px;
+  height: 20px;
+  border: 2px solid #721b4b;
+  border-radius: 999px;
+  background: #ef507d;
+  box-shadow: inset 8px 0 rgba(255, 255, 255, 0.18);
+}
+
+.immune-bacterium::before,
+.immune-bacterium::after {
+  position: absolute;
+  top: 2px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffd4df;
+  content: "";
+}
+
+.immune-bacterium::before {
+  left: 12px;
+}
+.immune-bacterium::after {
+  right: 8px;
+  bottom: 3px;
+  top: auto;
+}
+
+.immune-bacterium--one {
+  top: 32%;
+  right: 9%;
+  transform: rotate(24deg);
+}
+.immune-bacterium--two {
+  right: 37%;
+  bottom: 12%;
+  transform: rotate(-18deg) scale(0.72);
+}
+
+.immune-signal {
+  position: absolute;
+  z-index: 3;
+  top: 49%;
+  left: 38%;
+  width: 75px;
+  height: 75px;
+  border: 2px solid rgba(255, 211, 91, 0.54);
+  border-radius: 50%;
+}
+
+/* Small attract-mode motions play only on the selected cabinet. */
+.game-card[data-selected="true"] .bang-projectile {
+  animation: bang-preview-shot 2.1s ease-in-out infinite;
+}
+.game-card[data-selected="true"] .asteroid-laser {
+  animation: laser-preview-fire 1.4s ease-out infinite;
+}
+.game-card[data-selected="true"] .catcher-star--two {
+  animation: star-preview-pulse 1.8s ease-in-out infinite;
+}
+.game-card[data-selected="true"] .sticker-cursor {
+  animation: sticker-preview-place 1.9s ease-in-out infinite;
+}
+.game-card[data-selected="true"] .lizard-tongue {
+  animation: tongue-preview-flick 1.5s ease-in-out infinite;
+}
+.game-card[data-selected="true"] .immune-signal {
+  animation: immune-preview-signal 1.8s ease-out infinite;
+}
+
+@keyframes bang-preview-shot {
+  0%,
+  100% {
+    transform: translate(-64px, 51px);
+    opacity: 0;
+  }
+  18%,
+  76% {
+    opacity: 1;
+  }
+  48% {
+    transform: translate(0, -25px);
+  }
+  82% {
+    transform: translate(57px, 56px);
+    opacity: 0;
+  }
+}
+
+@keyframes laser-preview-fire {
+  0%,
+  58%,
+  100% {
+    opacity: 0;
+    transform: rotate(-27deg) scaleX(0.15);
+  }
+  64%,
+  78% {
+    opacity: 1;
+    transform: rotate(-27deg) scaleX(1);
+  }
+}
+
+@keyframes star-preview-pulse {
+  0%,
+  100% {
+    transform: scale(0.68) rotate(18deg);
+  }
+  50% {
+    transform: scale(0.9) rotate(29deg);
+  }
+}
+
+@keyframes sticker-preview-place {
+  0%,
+  100% {
+    transform: translate(8px, -8px);
+    opacity: 0.55;
+  }
+  48% {
+    transform: translate(0);
+    opacity: 1;
+  }
+}
+
+@keyframes tongue-preview-flick {
+  0%,
+  15%,
+  100% {
+    transform: rotate(-43deg) scaleX(0.2);
+  }
+  40%,
+  68% {
+    transform: rotate(-43deg) scaleX(1);
+  }
+}
+
+@keyframes immune-preview-signal {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-card[data-selected="true"] .bang-projectile,
+  .game-card[data-selected="true"] .asteroid-laser,
+  .game-card[data-selected="true"] .catcher-star--two,
+  .game-card[data-selected="true"] .sticker-cursor,
+  .game-card[data-selected="true"] .lizard-tongue,
+  .game-card[data-selected="true"] .immune-signal {
+    animation: none;
+  }
+}
+
 .not-found-panel {
   width: min(520px, 100%);
   border: 1px solid var(--line);
