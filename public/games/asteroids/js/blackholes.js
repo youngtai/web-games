@@ -242,6 +242,7 @@ function consumeBlackHoleObjects() {
   for (const player of G.players) {
     if (!player.alive || !player.ship) continue;
     const s = player.ship;
+    if (G.now < s.invulnEnd) continue;
     const bh = insideEventHorizon(s, 0.35);
     if (!bh) continue;
 
