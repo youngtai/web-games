@@ -1,3 +1,5 @@
+const ASTEROIDS_SCRIPT_VERSION = '20260808-spawn-invincibility';
+
 const ASTEROIDS_SCRIPT_PATHS = [
   'constants.js',
   'state.js',
@@ -15,7 +17,7 @@ const ASTEROIDS_SCRIPT_PATHS = [
   'render.js',
   'gamepad.js',
   'game.js',
-].map((name) => `/games/asteroids/js/${name}`);
+].map((name) => `/games/asteroids/js/${name}?v=${ASTEROIDS_SCRIPT_VERSION}`);
 
 let asteroidsScriptsPromise = null;
 
